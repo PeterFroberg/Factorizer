@@ -11,28 +11,21 @@ public class Factorizer implements Runnable {
         //private Object lock = new Object();
 
         private boolean isCompleted() {
-            //synchronized (lock) {
-                return completed;
-            //}
+            return completed;
         }
 
         private void markCompleted() {
-            //synchronized (lock) {
-                this.completed = true;
-            //}
+            this.completed = true;
         }
     }
 
-    private BigInteger max;
-    private BigInteger step;
-    private BigInteger product;
-    private BigInteger threadStartValue;
+    private BigInteger max, step, product, threadStartValue;
+    //private BigInteger step;
+    //private BigInteger product;
+    //private BigInteger threadStartValue;
     private final WorkStatus workStatus;// = new WorkStatus();
-    private BigInteger factor1, factor2;
-
 
     private Factorizer(BigInteger product, BigInteger step, BigInteger threadStartValue, WorkStatus workStatus, BigInteger max) {
-        //public Factorizer(BigInteger product, BigInteger step, BigInteger threadStartValue, BigInteger max) {
         this.product = product;
         this.step = step;
         this.threadStartValue = threadStartValue;
@@ -52,9 +45,6 @@ public class Factorizer implements Runnable {
                         return;
                     } //end if iscomplete
 
-
-                    //factor1 = number;
-                    //factor2 = product.divide(number);
                     workStatus.markCompleted();
                     System.out.println("Factor 1: " + number + " Factor 2: " + product.divide(number));
                     return;
@@ -63,7 +53,6 @@ public class Factorizer implements Runnable {
             number = number.add(step);
 
         }//End while
-
 
     }
 
@@ -100,7 +89,6 @@ public class Factorizer implements Runnable {
 
             for (int x = 0; x < numThreads; x++) {
                 factorizers[x] = new Factorizer(product, BigInteger.valueOf(numThreads), BigInteger.TWO.add(BigInteger.valueOf(x)), workStatus, max);
-                //factorizers[x] = new Factorizer(product, BigInteger.valueOf(numThreads), BigInteger.TWO.add(BigInteger.valueOf(x)), max);
                 threads[x] = new Thread(factorizers[x]);
             }
 
