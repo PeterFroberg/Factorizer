@@ -8,7 +8,6 @@ public class Factorizer implements Runnable {
 
     private static class WorkStatus {
         private boolean completed = false;
-        //private Object lock = new Object();
 
         private boolean isCompleted() {
             return completed;
@@ -20,10 +19,7 @@ public class Factorizer implements Runnable {
     }
 
     private BigInteger max, step, product, threadStartValue;
-    //private BigInteger step;
-    //private BigInteger product;
-    //private BigInteger threadStartValue;
-    private final WorkStatus workStatus;// = new WorkStatus();
+    private final WorkStatus workStatus;
 
     private Factorizer(BigInteger product, BigInteger step, BigInteger threadStartValue, WorkStatus workStatus, BigInteger max) {
         this.product = product;
@@ -38,7 +34,6 @@ public class Factorizer implements Runnable {
         BigInteger number = threadStartValue;
 
         while (number.compareTo(max) < 0 && !workStatus.isCompleted()) {
-
             if (product.remainder(number).compareTo(BigInteger.ZERO) == 0 && isPrime(number)) {
                 synchronized (workStatus) {
                     if (workStatus.isCompleted()) {
@@ -51,11 +46,8 @@ public class Factorizer implements Runnable {
                 }
             }
             number = number.add(step);
-
         }//End while
-
     }
-
 
     private boolean isPrime(BigInteger number) {
         boolean result = true;
@@ -111,6 +103,5 @@ public class Factorizer implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }
