@@ -8,18 +8,18 @@ public class Factorizer implements Runnable {
 
     private static class WorkStatus {
         private boolean completed = false;
-        private Object lock = new Object();
+        //private Object lock = new Object();
 
-        public boolean isCompleted() {
-            synchronized (lock) {
+        private boolean isCompleted() {
+            //synchronized (lock) {
                 return completed;
-            }
+            //}
         }
 
-        public void markCompleted(boolean completed) {
-            synchronized (lock) {
-                this.completed = completed;
-            }
+        private void markCompleted() {
+            //synchronized (lock) {
+                this.completed = true;
+            //}
         }
     }
 
@@ -27,11 +27,12 @@ public class Factorizer implements Runnable {
     private BigInteger step;
     private BigInteger product;
     private BigInteger threadStartValue;
-    private WorkStatus workStatus;// = new WorkStatus();
+    private final WorkStatus workStatus;// = new WorkStatus();
+    private BigInteger factor1, factor2;
 
 
-    public Factorizer(BigInteger product, BigInteger step, BigInteger threadStartValue, WorkStatus workStatus, BigInteger max) {
-    //public Factorizer(BigInteger product, BigInteger step, BigInteger threadStartValue, BigInteger max) {
+    private Factorizer(BigInteger product, BigInteger step, BigInteger threadStartValue, WorkStatus workStatus, BigInteger max) {
+        //public Factorizer(BigInteger product, BigInteger step, BigInteger threadStartValue, BigInteger max) {
         this.product = product;
         this.step = step;
         this.threadStartValue = threadStartValue;
@@ -40,45 +41,34 @@ public class Factorizer implements Runnable {
     }
 
     public void run() {
-        if (isPrime(product)) {
-            if(!workStatus.isCompleted()) {
-                workStatus.markCompleted(true);
-                System.out.println("No factorization possible");
-            }
-            //return;
-        }
-        BigInteger factor1, factor2;
 
         BigInteger number = threadStartValue;
 
-        while (number.compareTo(max) <= 0 && !workStatus.isCompleted()) {
+        while (number.compareTo(max) < 0 && !workStatus.isCompleted()) {
 
-            if (product.remainder(number).compareTo(BigInteger.ZERO) == 0) {
-                if (workStatus.isCompleted()) {
+            if (product.remainder(number).compareTo(BigInteger.ZERO) == 0 && isPrime(number)) {
+                synchronized (workStatus) {
+                    if (workStatus.isCompleted()) {
+                        return;
+                    } //end if iscomplete
+
+
+                    //factor1 = number;
+                    //factor2 = product.divide(number);
+                    workStatus.markCompleted();
+                    System.out.println("Factor 1: " + number + " Factor 2: " + product.divide(number));
                     return;
-                } //end if iscomplete
-
-                if (isPrime(number)) {
-                    factor1 = number;
-                    factor2 = product.divide(factor1);
-                    //synchronized (workStatus) {
-                        if (workStatus.isCompleted()) {
-                            return;
-                        }
-                        workStatus.markCompleted(true);
-                        System.out.println("Factor 1: " + factor1 + " Factor 2: " + factor2);
-                    //}
                 }
             }
             number = number.add(step);
+
         }//End while
 
 
     }
 
 
-
-    public boolean isPrime(BigInteger number) {
+    private boolean isPrime(BigInteger number) {
         boolean result = true;
         for (BigInteger d = new BigInteger("2"); d.compareTo(number.sqrt()) <= 0; d = d.add(BigInteger.ONE)) {
             if (number.remainder(d).equals(BigInteger.ZERO)) {
@@ -98,7 +88,9 @@ public class Factorizer implements Runnable {
             BigInteger product = new BigInteger(consoleReader.readLine());
             System.out.print(("Number of threads to be used: "));
             int numThreads = Integer.parseInt(consoleReader.readLine());
+            consoleReader.close();
 
+            //create threads
             long start = System.nanoTime();
             Thread[] threads = new Thread[numThreads];
             Factorizer[] factorizers = new Factorizer[numThreads];
@@ -116,16 +108,20 @@ public class Factorizer implements Runnable {
                 t.start();
             }
 
-            for (int i = 0; i < numThreads; i++) {
-                threads[i].join();
+            for (int x = 0; x < numThreads; x++) {
+                threads[x].join();
+            }
+
+            if (!workStatus.isCompleted()) {
+                System.out.println("No factorization possible");
             }
 
             long stop = System.nanoTime();
 
             System.out.println("\nExecution time (milliseconds): " + (stop - start) / 1000000000.0 + "seconds");
 
-        } catch (Exception exception) {
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
