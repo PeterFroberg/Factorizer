@@ -8,7 +8,7 @@ public class Factorizer implements Runnable {
 
     private static class WorkStatus {
         private boolean completed = false;
-
+ 
         private boolean isCompleted() {
             return completed;
         }
