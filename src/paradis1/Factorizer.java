@@ -13,12 +13,10 @@ public class Factorizer implements Runnable {
 
         private boolean isCompleted() {
             if (lock.tryLock()) {
-
                 try {
                     return completed;
                 } finally {
                     lock.unlock();
-
                 }
             }
             return false;
@@ -57,13 +55,10 @@ public class Factorizer implements Runnable {
 
         while (number.compareTo(max) < 0 && !workStatus.isCompleted()) {
             if (product.remainder(number).compareTo(BigInteger.ZERO) == 0 && isPrime(number)) {
-
                 if (workStatus.isCompleted()) {
                     return;
-                } //end if iscomplete
-
+                }
                 workStatus.markCompleted(number, product.divide(number));
-
                 return;
             }
             number = number.add(step);
@@ -105,6 +100,7 @@ public class Factorizer implements Runnable {
                 threads[x] = new Thread(factorizers[x]);
             }
 
+            //Start threads, Joins threads
             for (Thread t : threads) {
                 t.start();
             }
@@ -116,9 +112,8 @@ public class Factorizer implements Runnable {
             if (!workStatus.isCompleted()) {
                 System.out.println("No factorization possible");
             }
-
+            
             long stop = System.nanoTime();
-
             System.out.println("\nExecution time (milliseconds): " + (stop - start) / 1000000000.0 + "seconds");
 
         } catch (Exception e) {
