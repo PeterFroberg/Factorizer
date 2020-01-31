@@ -24,10 +24,13 @@ public class Factorizer implements Runnable {
             return false;
         }
 
-        private void markCompleted() {
+        private void markCompleted(BigInteger factor1, BigInteger factor2) {
             lock.lock();
             try {
-                this.completed = true;
+                if (!completed) {
+                    this.completed = true;
+                    System.out.println("Factor 1: " + factor1 + " Factor 2: " + factor2);
+                }
             } finally {
                 if (lock.isHeldByCurrentThread()) {
                     lock.unlock();
@@ -54,15 +57,14 @@ public class Factorizer implements Runnable {
 
         while (number.compareTo(max) < 0 && !workStatus.isCompleted()) {
             if (product.remainder(number).compareTo(BigInteger.ZERO) == 0 && isPrime(number)) {
-                synchronized (workStatus) {
-                    if (workStatus.isCompleted()) {
-                        return;
-                    } //end if iscomplete
 
-                    workStatus.markCompleted();
-                    System.out.println("Factor 1: " + number + " Factor 2: " + product.divide(number));
+                if (workStatus.isCompleted()) {
                     return;
-                }
+                } //end if iscomplete
+
+                workStatus.markCompleted(number, product.divide(number));
+
+                return;
             }
             number = number.add(step);
         }//End while
