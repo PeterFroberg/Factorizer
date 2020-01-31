@@ -3,18 +3,37 @@ package paradis1;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Factorizer implements Runnable {
 
     private static class WorkStatus {
         private boolean completed = false;
- 
+        private ReentrantLock lock = new ReentrantLock();
+
         private boolean isCompleted() {
-            return completed;
+            if (lock.tryLock()) {
+
+                try {
+                    return completed;
+                } finally {
+                    lock.unlock();
+
+                }
+            }
+            return false;
         }
 
         private void markCompleted() {
-            this.completed = true;
+            lock.lock();
+            try {
+                this.completed = true;
+            } finally {
+                if (lock.isHeldByCurrentThread()) {
+                    lock.unlock();
+                }
+            }
+
         }
     }
 
